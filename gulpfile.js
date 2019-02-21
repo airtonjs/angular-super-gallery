@@ -70,7 +70,7 @@ gulp.task("ts", function () {
 			removeComments: true
 		}))
 		.pipe(concat(filename))
-		.pipe(gulpif(!PROD, sourcemaps.write()))
+		.pipe(gulpif(!PROD, sourcemaps.write('.', {includeContent: false, sourceRoot: ''})))
 		.pipe(gulp.dest(TEMP))
 		.pipe(debug());
 
