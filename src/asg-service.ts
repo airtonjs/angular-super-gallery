@@ -21,8 +21,8 @@ namespace angularSuperGallery {
 		transition?: string;
 		title?: string;
 		subtitle?: string;
-		titleFromImage? : boolean;
-		subtitleFromImage? : boolean;
+		titleFromImage?: boolean;
+		subtitleFromImage?: boolean;
 		arrows?: {
 			preload?: boolean;
 			enabled?: boolean;
@@ -119,6 +119,7 @@ namespace angularSuperGallery {
 	export interface IOptions {
 
 		debug?: boolean;
+		databaseOffline?: string;
 		baseUrl?: string;
 		hashUrl?: boolean;
 		duplicates?: boolean;
@@ -305,6 +306,7 @@ namespace angularSuperGallery {
 		public optionsLoaded = false;
 		public defaults: IOptions = {
 			debug: false, // image load, autoplay, etc. info in console.log
+			databaseOffline: '', //if not empty use database offline
 			hashUrl: true, // enable/disable hash usage in url (#asg-nature-4)
 			baseUrl: '', // url prefix
 			duplicates: false, // enable or disable same images (url) in gallery
@@ -1375,7 +1377,7 @@ namespace angularSuperGallery {
 		}
 
 		// find image in gallery by modal source
-		public findImage(filename : string) {
+		public findImage(filename: string) {
 
 			let length = this.files.length;
 
@@ -1390,7 +1392,7 @@ namespace angularSuperGallery {
 		}
 
 
-		public getFullUrl(url : string, baseUrl?: string) {
+		public getFullUrl(url: string, baseUrl?: string) {
 
 			baseUrl = baseUrl === undefined ? this.options.baseUrl : baseUrl;
 			let isFull = (url.indexOf('//') === 0 || url.indexOf('http') === 0) ? true : false;
@@ -1515,5 +1517,22 @@ namespace angularSuperGallery {
 
 	app.service('asgService', ['$timeout', '$interval', '$location', '$rootScope', '$window', ServiceController]);
 
-}
+	app.directive('asgSrc', function ($q) {
+		return {
+			restrict: 'A',
+			link: function (scope, element, attrs) {
+				if (attrs.databaseOffline) {
+					let bancoDeDadosIndexedDB = new DataBaseIndexedDB(attrs.databaseOffline);
+					bancoDeDadosIndexedDB.abreBanco(() => {
+						new LoaderImageOnOff(bancoDeDadosIndexedDB, attrs.asgSrc, element[0]);
+					});
+				}
+				else {
+					element[0].setAttribute('src',attrs.asgSrc);
+				}
+				return;
+			}
+		};
+	});
 
+}

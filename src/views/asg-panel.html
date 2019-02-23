@@ -5,7 +5,8 @@
 		 ng-style="{'background-color': file.source.color}"
 		 ng-class="{'selected' : $ctrl.asg.selected == key}">
 
-		<img ng-src="{{ file.source.panel }}"
+		<img database-offline="{{ $ctrl.asg.options.databaseOffline }}" 
+		     asg-src="{{ file.source.panel }}" 
 			 ng-click="$ctrl.setSelected(key, $event)"
 			 alt="{{ file.title }}"/>
 
