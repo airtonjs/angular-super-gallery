@@ -1,5 +1,4 @@
 ///<reference path="./../typings/index.d.ts" />
-
 namespace angularSuperGallery {
 
 	// modal component options
@@ -1081,12 +1080,17 @@ namespace angularSuperGallery {
 
 				if (isFull) {
 					source = index;
-				} else {
+				} else { 
 					source = file.source[index];
 				}
 
 				if (source) {
-					style['background-image'] = 'url(' + source + ')';
+					if (this.options.databaseOffline) {
+						style['asg-background-image'] = 'url(' + source + ')';
+					}
+					else {
+						style['background-image'] = 'url(' + source + ')';
+					}
 				}
 
 			}
@@ -1096,12 +1100,17 @@ namespace angularSuperGallery {
 			}
 
 			if (file.source.placeholder) {
-				style['background-image'] = 'url(' + file.source.placeholder + ')';
+				if (this.options.databaseOffline) {
+					style['asg-background-image'] = 'url(' + file.source.placeholder + ')';
+				}
+				else {
+					style['background-image'] = 'url(' + file.source.placeholder + ')';
+				}
 			}
-
 			return style;
-
 		}
+
+
 
 		// set visible
 		public set modalVisible(value: boolean) {
@@ -1524,15 +1533,40 @@ namespace angularSuperGallery {
 				if (attrs.databaseOffline) {
 					let bancoDeDadosIndexedDB = new DataBaseIndexedDB(attrs.databaseOffline);
 					bancoDeDadosIndexedDB.abreBanco(() => {
-						new LoaderImageOnOff(bancoDeDadosIndexedDB, attrs.asgSrc, element[0]);
+						new LoaderImageOnOff(bancoDeDadosIndexedDB, attrs.asgSrc, element[0], false);
 					});
 				}
 				else {
-					element[0].setAttribute('src',attrs.asgSrc);
+					element[0].setAttribute('src', attrs.asgSrc);
 				}
 				return;
 			}
 		};
 	});
-
+	app.directive('asgBackgroudImageOff', function ($q) {
+		return {
+			restrict: 'A',
+			link: function (scope, element, attrs) {
+				attrs.$observe('ngStyle', function (ngSrc: string) {
+					let url: string = element[0].style.getPropertyValue('asg-background-image');
+					if (url && url.startsWithI("url(")) {
+						element[0].style.setProperty('asg-background-image', null);
+						if (attrs.databaseOffline) {
+							let bancoDeDadosIndexedDB = new DataBaseIndexedDB(attrs.databaseOffline);
+							bancoDeDadosIndexedDB.abreBanco(() => {
+								new LoaderImageOnOff(bancoDeDadosIndexedDB, url, element[0], true);
+							});
+						}else { 
+							element[0].style.setProperty('background-image',url)
+						}
+					} else {
+						element[0].style.setProperty('background-image',url)
+					}
+				});
+				return;
+			}
+		};
+	});
 }
+
+
